@@ -23,4 +23,4 @@ pub use artifacts::{Artifact, ArtifactType, SearchResult};
 pub use chat::{
     ChatCompletionRequest, ChatCompletionResponse, Message, MessageContent, Role,
 };
-pub use extensions::{ExtensionInfo, ExtensionStatus, Category, ClientApp};
+pub use extensions::{ExtensionInfo, ExtensionRegistry, ExtensionStatus, Category, ClientApp};
