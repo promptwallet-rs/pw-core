@@ -2,7 +2,7 @@
 name = "pw-core"
 version = "0.1.0"
 edition = "2024"
-authors = ["PromptWallet Team"]
+authors = ["PromptWallet Team <team@promptwallet.com>"]
 description = "Shared types for PromptWallet - OpenAI-compatible chat API types, artifacts, and extensions"
 license = "MIT"
 repository = "https://github.com/rust-promptwallet/pw-core"
