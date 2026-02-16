@@ -1,11 +1,11 @@
 [package]
 name = "pw-core"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 authors = ["PromptWallet Team <team@promptwallet.com>"]
 description = "Shared types for PromptWallet - OpenAI-compatible chat API types, artifacts, and extensions"
 license = "MIT"
-repository = "https://github.com/rust-promptwallet/pw-core"
+repository = "https://github.com/promptwallet-rs/pw-core"
 keywords = ["openai", "llm", "chat", "ai", "api"]
 categories = ["api-bindings", "data-structures"]
 readme = "README.md"
