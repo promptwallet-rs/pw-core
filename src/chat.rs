@@ -70,6 +70,11 @@ pub struct ChatCompletionRequest {
     /// How to handle tool calls
     #[serde(skip_serializing_if = "Option::is_none")]
     pub tool_choice: Option<ToolChoice>,
+
+    /// RAG namespaces for context injection (PromptWallet extension)
+    /// e.g. ["codebase", "docs", "chats"] — filters which artifact types to search
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub rag_namespaces: Option<Vec<String>>,
 }
 
 fn default_temperature() -> f32 {
@@ -100,6 +105,7 @@ impl Default for ChatCompletionRequest {
             seed: None,
             tools: vec![],
             tool_choice: None,
+            rag_namespaces: None,
         }
     }
 }
