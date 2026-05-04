@@ -21,10 +21,14 @@ uuid = { version = "1", features = ["v4", "serde"] }
 # DateTime support
 chrono = { version = "0.4", features = ["serde"] }
 
+# OpenAPI / JSON Schema (optional; enabled by pw-api for interactive docs)
+utoipa = { version = "5", optional = true, features = ["chrono", "uuid"] }
+
 [features]
 default = []
 # Enable this in server context for sqlx derives
 sqlx = ["dep:sqlx"]
+utoipa = ["dep:utoipa"]
 
 [dependencies.sqlx]
 version = "0.8"

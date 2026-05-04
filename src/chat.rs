@@ -10,13 +10,29 @@ use uuid::Uuid;
 // Request Types
 // ============================================================================
 
+/// PromptWallet extension: how RAG namespaces are chosen for `/v1/chat/completions`.
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum PwRagMode {
+    /// Search only MasterCanvas component-tree artifacts (`mastercanvas` namespace).
+    /// Ignores unrelated `rag_namespaces` entries for *type* filtering. For **per-canvas** results,
+    /// also send `rag_namespaces: ["mastercanvas:{project_id}"]` (same id used when saving trees);
+    /// the API preserves that id and scopes vector search to `metadata.project_id` / `metadata.namespace`.
+    Mastercanvas,
+    /// Use `rag_namespaces` as provided (or server defaults when omitted).
+    Standard,
+}
+
 /// Chat completion request - matches OpenAI schema exactly
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ChatCompletionRequest {
-    /// Model to use (e.g., "gpt-4", "llama-3.1-70b")
+    /// Model to use (e.g., "gpt-4", "llama-3.3-70b-versatile")
     pub model: String,
 
     /// Messages in the conversation
+    #[cfg_attr(feature = "utoipa", schema(value_type = Object))]
     pub messages: Vec<Message>,
 
     /// Sampling temperature (0-2)
@@ -56,6 +72,7 @@ pub struct ChatCompletionRequest {
     pub user: Option<String>,
 
     /// Response format
+    #[cfg_attr(feature = "utoipa", schema(value_type = Object))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub response_format: Option<ResponseFormat>,
 
@@ -64,10 +81,12 @@ pub struct ChatCompletionRequest {
     pub seed: Option<u64>,
 
     /// Tool/function definitions
+    #[cfg_attr(feature = "utoipa", schema(value_type = Object))]
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub tools: Vec<Tool>,
 
     /// How to handle tool calls
+    #[cfg_attr(feature = "utoipa", schema(value_type = Object))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub tool_choice: Option<ToolChoice>,
 
@@ -75,6 +94,11 @@ pub struct ChatCompletionRequest {
     /// e.g. ["codebase", "docs", "chats"] — filters which artifact types to search
     #[serde(skip_serializing_if = "Option::is_none")]
     pub rag_namespaces: Option<Vec<String>>,
+
+    /// PromptWallet extension: when `Some(Mastercanvas)`, RAG uses only the `mastercanvas` namespace
+    /// (component trees). When `Some(Standard)` or omitted, `rag_namespaces` applies.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub pw_rag_mode: Option<PwRagMode>,
 }
 
 fn default_temperature() -> f32 {
@@ -106,6 +130,7 @@ impl Default for ChatCompletionRequest {
             tools: vec![],
             tool_choice: None,
             rag_namespaces: None,
+            pw_rag_mode: None,
         }
     }
 }
@@ -180,6 +205,7 @@ impl Message {
 }
 
 /// Role of a message sender
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, Hash)]
 #[serde(rename_all = "lowercase")]
 pub enum Role {
@@ -372,6 +398,7 @@ pub struct FunctionName {
 // ============================================================================
 
 /// Chat completion response - non-streaming
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChatCompletionResponse {
     pub id: String,
@@ -409,16 +436,20 @@ impl ChatCompletionResponse {
     }
 }
 
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Choice {
     pub index: u32,
+    #[cfg_attr(feature = "utoipa", schema(value_type = Object))]
     pub message: Message,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub finish_reason: Option<String>,
+    #[cfg_attr(feature = "utoipa", schema(value_type = Object))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub logprobs: Option<serde_json::Value>,
 }
 
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct Usage {
     pub prompt_tokens: u32,
@@ -504,12 +535,14 @@ pub struct FunctionCallChunk {
 // Models Endpoint
 // ============================================================================
 
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ModelsResponse {
     pub object: String,
     pub data: Vec<ModelInfo>,
 }
 
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ModelInfo {
     pub id: String,
@@ -526,11 +559,13 @@ pub struct ModelInfo {
 // Error Response
 // ============================================================================
 
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ErrorResponse {
     pub error: ErrorDetail,
 }
 
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ErrorDetail {
     pub message: String,
@@ -591,6 +626,19 @@ mod tests {
         let json = serde_json::to_value(&request).unwrap();
         assert_eq!(json["model"], "gpt-4");
         assert_eq!(json["messages"][0]["role"], "user");
+    }
+
+    #[test]
+    fn test_pw_rag_mode_roundtrip() {
+        let json = serde_json::json!({
+            "model": "x",
+            "messages": [{"role": "user", "content": "hi"}],
+            "pw_rag_mode": "mastercanvas",
+        });
+        let req: ChatCompletionRequest = serde_json::from_value(json).unwrap();
+        assert_eq!(req.pw_rag_mode, Some(PwRagMode::Mastercanvas));
+        let out = serde_json::to_value(&req).unwrap();
+        assert_eq!(out["pw_rag_mode"], "mastercanvas");
     }
 
     #[test]

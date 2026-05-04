@@ -21,6 +21,6 @@ pub mod extensions;
 // Re-export common types at crate root for convenience
 pub use artifacts::{Artifact, ArtifactType, SearchResult};
 pub use chat::{
-    ChatCompletionRequest, ChatCompletionResponse, Message, MessageContent, Role,
+    ChatCompletionRequest, ChatCompletionResponse, Message, MessageContent, PwRagMode, Role,
 };
 pub use extensions::{ExtensionInfo, ExtensionRegistry, ExtensionStatus, Category, ClientApp};

@@ -77,6 +77,8 @@ pub enum ArtifactType {
     Summary,
     /// Analysis or insight
     Analysis,
+    /// Component tree (MasterCanvas visual editor)
+    ComponentTree,
     /// Custom/other type
     Custom,
 }
@@ -90,6 +92,7 @@ impl ArtifactType {
             ArtifactType::CodeSnippet,
             ArtifactType::Summary,
             ArtifactType::Analysis,
+            ArtifactType::ComponentTree,
             ArtifactType::Custom,
         ]
     }
@@ -102,6 +105,7 @@ impl ArtifactType {
             ArtifactType::CodeSnippet => "code_snippet",
             ArtifactType::Summary => "summary",
             ArtifactType::Analysis => "analysis",
+            ArtifactType::ComponentTree => "component_tree",
             ArtifactType::Custom => "custom",
         }
     }
@@ -273,6 +277,7 @@ mod tests {
             (ArtifactType::CodeSnippet, "\"code_snippet\""),
             (ArtifactType::Summary, "\"summary\""),
             (ArtifactType::Analysis, "\"analysis\""),
+            (ArtifactType::ComponentTree, "\"component_tree\""),
             (ArtifactType::Custom, "\"custom\""),
         ];
 

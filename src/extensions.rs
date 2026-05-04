@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 // ============================================================================
 
 /// Extension metadata (from registry)
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ExtensionInfo {
     pub id: String,
@@ -26,6 +27,7 @@ pub struct ExtensionInfo {
 }
 
 /// Extension status
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum ExtensionStatus {
@@ -57,6 +59,7 @@ impl std::fmt::Display for ExtensionStatus {
 // ============================================================================
 
 /// Extension category
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Category {
     pub id: String,
@@ -70,6 +73,7 @@ pub struct Category {
 // ============================================================================
 
 /// Client application configuration
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ClientApp {
     pub id: String,
